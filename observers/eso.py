@@ -22,10 +22,9 @@ class ESO:
         y = np.dot(self.W, self.state)  # output
         e = q - y
         z = np.dot(self.B, u) - self.L * e
-        xdot = np.dot(self.A, self.state) + np.dot(self.B, u) + self.L * e
+        xdot = np.dot(self.A, self.state) + z
         dhatdot = xdot[-1] - self.L * e[-1]
-        xhatdot = np.dot(self.A, self.state) + np.dot(self.B, u) + self.L * e - np.dot(self.W,
-                                                                                       np.array([[0], [dhatdot]]))
+        xhatdot = np.dot(self.A, self.state) + z - np.dot(self.W, np.array([[0], [dhatdot]]))
 
         # Update the ESO state
         self.state[:-1] = self.state[1:]
@@ -34,5 +33,5 @@ class ESO:
         return self.state
 
 
-def get_state(self):
-        return self.state
+    def get_state(self):
+            return self.state

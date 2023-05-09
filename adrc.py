@@ -34,11 +34,11 @@ controller = ADRController(Tp, params=[[b_est_1, kp_est_1, kd_est_1, p1, q1_0],
 
 Q, Q_d, u, T = simulate("PYBULLET", traj_gen, controller, Tp, end)
 
-eso1 = np.array(controller.joint_controllers[0].eso.states)
-eso2 = np.array(controller.joint_controllers[1].eso.states)
+eso1 = np.array(controller.joint_controllers[0].eso.state)
+eso2 = np.array(controller.joint_controllers[1].eso.state)
 
 plt.subplot(221)
-plt.plot(T, eso1[:, 0])
+plt.plot(T, eso1[:,0])
 plt.plot(T, Q[:, 0], 'r')
 plt.subplot(222)
 plt.plot(T, eso1[:, 1])

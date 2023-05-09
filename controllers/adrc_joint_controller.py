@@ -20,28 +20,27 @@ class ADRCJointController(Controller):
     def set_b(self, b):
         ### TODO update self.b and B in ESO
         self.b = b
-        self.eso.set_B(np.array([0, self.b, 0]))
+        self.eso.B[1] = self.b
 
 
     def calculate_control(self, x, q_d, q_d_dot, q_d_ddot):
         ### TODO implement ADRC
-        q, q_dot = x
-        q_est = self.eso.get_state()
-        q_dot_est = q_est[1]
-        q_ddot_est = q_est[2]
 
-        e = q - q_est[0]
-        e_dot = q_dot - q_dot_est
+        # Calculate the error and its derivatives
+        e = q_d - x
+        e_dot = q_d_dot - np.dot(self.eso.W, self.eso.state)
+        A_state = np.dot(self.eso.A, self.eso.state) if self.eso.state is not None else 10
+        B_kp_e = np.dot(self.eso.B, self.kp * e) if self.kp is not None else 10
+        L_e_dot = np.dot(self.eso.L, e_dot) if e_dot is not None else 10
+        e_ddot = q_d_ddot - A_state - B_kp_e - L_e_dot
 
-        z1 = e - q_est[1]
-        z2 = e_dot - q_dot_est
+        # Update the ESO with the new state estimate
+        self.eso.update(q_d_ddot, self.kd * e_dot + self.kp * e) if self.kd is not None else 0
 
-        z3 = q_dot - q_ddot_est
+        # Calculate the control input using ADRC equations
+        v = e_ddot + np.dot(self.eso.L, e_dot) + np.dot(self.eso.W, self.eso.state)
+        u = (1 / self.b) * (v - np.dot(self.eso.A, self.eso.state) - np.dot(self.eso.B, self.kd * e_dot) - np.dot(
+            self.eso.L, e)) if self.b is not None else 0
 
-        u_tilde = self.kp * z1 + self.kd * z2 - q_ddot_est + self.b * z3
-
-        u = u_tilde + q_d_ddot[0]
-
-        self.eso.update(q, u)
 
         return u

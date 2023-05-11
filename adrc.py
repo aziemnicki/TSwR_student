@@ -11,7 +11,7 @@ from trajectory_generators.poly3 import Poly3
 from utils.simulation import simulate
 
 Tp = 0.001
-end = 3
+end = 5
 
 # traj_gen = ConstantTorque(np.array([0., 1.0])[:, np.newaxis])
 traj_gen = Sinusoidal(np.array([0., 1.]), np.array([2., 2.]), np.array([0., 0.]))
@@ -21,10 +21,10 @@ b_est_1 = 10
 b_est_2 = 10
 kp_est_1 = -10
 kp_est_2 = -10
-kd_est_1 = -6
-kd_est_2 = -6
-p1 = 100
-p2 = 100
+kd_est_1 = -10
+kd_est_2 = -10
+p1 = 150
+p2 = 150
 
 q0, qdot0, _ = traj_gen.generate(0.)
 q1_0 = np.array([q0[0], qdot0[0]])
@@ -34,8 +34,9 @@ controller = ADRController(Tp, params=[[b_est_1, kp_est_1, kd_est_1, p1, q1_0],
 
 Q, Q_d, u, T = simulate("PYBULLET", traj_gen, controller, Tp, end)
 
-eso1 = np.array(controller.joint_controllers[0].eso.get_state())
-eso2 = np.array(controller.joint_controllers[1].eso.get_state())
+eso1 = np.array(controller.joint_controllers[0].eso.states)
+eso2 = np.array(controller.joint_controllers[1].eso.states)
+
 
 plt.subplot(221)
 plt.plot(T, eso1[:, 0])
@@ -52,7 +53,7 @@ plt.plot(T, Q[:, 3], 'r')
 plt.show()
 
 plt.subplot(221)
-plt.plot(T, Q[: 0], 'r')
+plt.plot(T, Q[:, 0], 'r')
 plt.plot(T, Q_d[:, 0], 'b')
 plt.subplot(222)
 plt.plot(T, Q[:, 1], 'r')

@@ -16,14 +16,14 @@ class ESO:
         self.B = B
 
     def update(self, q, u):
-        self.states.append(self.state)
+        self.states.append(copy(self.state))
         ### TODO implement ESO update
         z = np.reshape(self.state, (len(self.state), 1))
 
         zhatdot = np.dot(self.A, z) + np.dot(self.B, u) + np.dot(self.L, (q - self.W @ z))
         self.state = (self.state + self.Tp * np.reshape(zhatdot, (1, len(zhatdot))))[0]
+        print('State',self.state)
 
-        return self.state
 
 
     def get_state(self):

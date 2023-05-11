@@ -39,7 +39,6 @@ class ADRCJointController(Controller):
         u = (1/self.b) * v if self.b is not None else 1
 
         self.eso.update(x[0], u)
-
         #TODO 9
 
         # model M matrix
@@ -56,18 +55,19 @@ class ADRCJointController(Controller):
         I_3 = 2. / 5 * m3 * r3 ** 2
         d1 = l1 / 2
         d2 = l2 / 2
+        if i % 2 == 0:
+            alpha = I_1 + I_2 + m1 * d1 ** 2 + m2 * (l1 ** 2 + d2 ** 2) + I_3 + m3 * (l1 ** 2 + l2 ** 2)
+            beta = m2 * l1 * d2 + m3 * l1 * l2
+            delta = I_2 + m2 * d2 ** 2 + I_3 + m3 * l2 ** 2
 
-        alpha = I_1 + I_2 + m1 * d1 ** 2 + m2 * (l1 ** 2 + d2 ** 2) + I_3 + m3 * (l1 ** 2 + l2 ** 2)
-        beta = m2 * l1 * d2 + m3 * l1 * l2
-        delta = I_2 + m2 * d2 ** 2 + I_3 + m3 * l2 ** 2
-
-        m_00 = alpha + 2 * beta * np.cos(x_hat)
-        m_01 = delta + beta * np.cos(x_hat)
-        m_10 = m_01
-        m_11 = delta
-        # inversing matrix M to M^-1
-        M = [[m_00, m_01], [m_10, m_11]]
-        M_inv = np.linalg.inv(M)
-        self.set_b(M_inv[i, i])
+            m_00 = alpha + 2 * beta * np.cos(x_hat)
+            m_01 = delta + beta * np.cos(x_hat)
+            m_10 = m_01
+            m_11 = delta
+            # inversing matrix M to M^-1
+            M = [[m_00, m_01], [m_10, m_11]]
+            M_inv = np.linalg.inv(M)
+            self.set_b(M_inv[i, i])
+        else: pass
 
         return u

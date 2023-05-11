@@ -23,14 +23,12 @@ class ManipulatorModel:
         """
         q1, q2, q1_dot, q2_dot = x
         d1 = self.l1 / 2
-        d2 = self.l2/ 2
+        d2 = self.l2 / 2
         alpha = self.I_1 + self.I_2 + self.m1 * d1 ** 2 + self.m2 * (self.l1 ** 2 + d2 ** 2) + \
                 self.I_3 + self.m3 * (self.l1 ** 2 + self.l2 ** 2)
         beta = self.m2 * self.l1 * d2 + self.m3 * self.l1 * self.l2
         gamma = self.I_2 + self.m2 * d2 ** 2 + self.I_3 + self.m3 * self.l2 ** 2
-        # alpha = self.m1*d1**2 + self.I_1+self.m2*(self.l1**2+d2**2)+self.I_2
-        # beta = self.m2 * self.l2 * d2
-        # gamma = self.m2 * d2 ** 2 + self.I_2
+
         m11 = alpha + 2*beta * np.cos(q2)
         m12 = gamma + beta * np.cos(q2)
         m21 = gamma + beta * np.cos(q2)

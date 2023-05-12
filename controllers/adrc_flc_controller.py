@@ -31,20 +31,31 @@ class ADRFLController(Controller):
 
     def update_params(self, q, q_dot):
         ### TODO Implement procedure to set eso.A and eso.B
-
-        self.eso.A = None
-        self.eso.B = None
+        x = np.concatenate((q, q_dot), axis=0)
+        M = self.model.M(x)
+        M_inv = np.linalg.inv(M)
+        C = self.model.C(x)
+        M_hat = - (M_inv @ C)
+        self.A[2:4, 2:4] = M_hat
+        self.B[2:4, :2] = M_inv
+        self.eso.A = self.A
+        self.eso.B = self.B
 
     def calculate_control(self, x, q_d, q_d_dot, q_d_ddot):
         ### TODO implement centralized ADRFLC
-        e = x[0] - q_d
+        q1, q2, q1_dot, q2_dot = x
+        q = np.array([q1,q2])
+        e = q1 - q_d
         z_hat = self.eso.get_state()
-        x_hat = z_hat[0]
-        x_hatDot = z_hat[1]
-        f = z_hat[2]
+        x_hat = z_hat[0:2]
+        x_hatDot = z_hat[2:4]
+        f = z_hat[4:]
         e_dot = x_hatDot - q_d_dot
-        v = (q_d_ddot + self.kd * e_dot + self.kp * e) - f
-        u = (1 / self.b) * v if self.b is not None else 1
+        M_est = self.model.M(x)
+        C_est = self.model.C(x)
 
-        self.eso.update(x[0], u)
+        v = self.Kp@e + self.Kd@e_dot+q_d_dot
+        u = M_est@(v-f) + C_est@x_hatDot
+        self.update_params(x_hat, x_hatDot)
+        self.eso.update(q.reshape(len(q), 1), u.reshape(len(u), 1))
         return u
